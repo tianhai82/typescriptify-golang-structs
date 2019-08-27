@@ -196,7 +196,7 @@ func (t TypeScriptify) ConvertToFile(fileName string) error {
 		return err
 	}
 
-	f.WriteString("/* Do not change, this code is generated from Golang structs */\n\n")
+	f.WriteString("/* Do not change, this code is generated from Golang structs */\n")
 	f.WriteString(converted)
 	f.WriteString("\n")
 	if err != nil {
