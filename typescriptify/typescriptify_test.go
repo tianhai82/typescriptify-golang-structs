@@ -43,14 +43,14 @@ func TestTypescriptifyWithTypes(t *testing.T) {
 	converter.CreateFromMethod = false
 	converter.BackupDir = ""
 
-	desiredResult := `export class Dummy {
+	desiredResult := `export interface Dummy {
         something: string;
 }
-export class Address {
+export interface Address {
         duration: number;
         text: string;
 }
-export class Person {
+export interface Person {
         name: string;
         nicknames: string[];
 		addresses: Address[];
@@ -71,14 +71,14 @@ func TestTypescriptifyWithInstances(t *testing.T) {
 	converter.DontExport = true
 	converter.BackupDir = ""
 
-	desiredResult := `class Dummy {
+	desiredResult := `interface Dummy {
         something: string;
 }
-class Address {
+interface Address {
         duration: number;
         text: string;
 }
-class Person {
+interface Person {
         name: string;
         nicknames: string[];
 		addresses: Address[];
@@ -98,14 +98,14 @@ func TestTypescriptifyWithDoubleClasses(t *testing.T) {
 	converter.CreateFromMethod = false
 	converter.BackupDir = ""
 
-	desiredResult := `export class Dummy {
+	desiredResult := `export interface Dummy {
         something: string;
 }
-export class Address {
+export interface Address {
         duration: number;
         text: string;
 }
-export class Person {
+export interface Person {
         name: string;
 		nicknames: string[];
 		addresses: Address[];
@@ -129,7 +129,7 @@ func TestWithPrefixes(t *testing.T) {
 	converter.BackupDir = ""
 	converter.CreateFromMethod = true
 
-	desiredResult := `class test_Dummy_test {
+	desiredResult := `interface test_Dummy_test {
     something: string;
 
     static createFrom(source: any) {
@@ -140,7 +140,7 @@ func TestWithPrefixes(t *testing.T) {
     }
 
 }
-class test_Address_test {
+interface test_Address_test {
     duration: number;
     text: string;
 
@@ -153,7 +153,7 @@ class test_Address_test {
     }
 
 }
-class test_Person_test {
+interface test_Person_test {
     name: string;
     nicknames: string[];
     addresses: test_Address_test[];
@@ -226,7 +226,7 @@ func TestTypescriptifyCustomType(t *testing.T) {
 	converter.CreateFromMethod = false
 	converter.BackupDir = ""
 
-	desiredResult := `export class TestCustomType {
+	desiredResult := `export interface TestCustomType {
         map: {[key: string]: number};
 }`
 	testConverter(t, converter, desiredResult)
@@ -243,7 +243,7 @@ func TestDate(t *testing.T) {
 	converter.CreateFromMethod = true
 	converter.BackupDir = ""
 
-	desiredResult := `export class TestCustomType {
+	desiredResult := `export interface TestCustomType {
     time: Date;
 
     static createFrom(source: any) {
@@ -268,7 +268,7 @@ func TestRecursive(t *testing.T) {
 	converter.CreateFromMethod = true
 	converter.BackupDir = ""
 
-	desiredResult := `export class Test {
+	desiredResult := `export interface Test {
     children: Test[];
 
     static createFrom(source: any) {
@@ -296,7 +296,7 @@ func TestArrayOfArrays(t *testing.T) {
 	converter.CreateFromMethod = true
 	converter.BackupDir = ""
 
-	desiredResult := `export class Key {
+	desiredResult := `export interface Key {
     key: string;
 
     static createFrom(source: any) {
@@ -307,7 +307,7 @@ func TestArrayOfArrays(t *testing.T) {
     }
 
 }
-export class Keyboard {
+export interface Keyboard {
     keys: Key[][];
 
     static createFrom(source: any) {
@@ -332,7 +332,7 @@ func TestAny(t *testing.T) {
 	converter.CreateFromMethod = true
 	converter.BackupDir = ""
 
-	desiredResult := `export class Test {
+	desiredResult := `export interface Test {
     field: any;
 
     static createFrom(source: any) {
@@ -363,7 +363,7 @@ func TestTypeAlias(t *testing.T) {
 	converter.CreateFromMethod = false
 	converter.BackupDir = ""
 
-	desiredResult := `export class Person {
+	desiredResult := `export interface Person {
     birth: number;
 }`
 	testConverter(t, converter, desiredResult)
@@ -390,7 +390,7 @@ func TestOverrideCustomType(t *testing.T) {
 	converter.CreateFromMethod = false
 	converter.BackupDir = ""
 
-	desiredResult := `export class SomeStruct {
+	desiredResult := `export interface SomeStruct {
     time: number;
 }`
 	testConverter(t, converter, desiredResult)

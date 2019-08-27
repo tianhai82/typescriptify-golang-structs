@@ -212,7 +212,7 @@ func (t *TypeScriptify) convertType(typeOf reflect.Type, customCode map[string]s
 	t.alreadyConverted[typeOf] = true
 
 	entityName := t.Prefix + typeOf.Name() + t.Suffix
-	result := fmt.Sprintf("class %s {\n", entityName)
+	result := fmt.Sprintf("interface %s {\n", entityName)
 	if !t.DontExport {
 		result = "export " + result
 	}
@@ -295,10 +295,10 @@ func (t *TypeScriptify) convertType(typeOf reflect.Type, customCode map[string]s
 		result += fmt.Sprintf("%s}\n\n", t.Indent)
 	}
 
-	if customCode != nil {
-		code := customCode[entityName]
-		result += t.Indent + "//[" + entityName + ":]\n" + code + "\n\n" + t.Indent + "//[end]\n"
-	}
+	//if customCode != nil {
+	//	code := customCode[entityName]
+	//	result += t.Indent + "//[" + entityName + ":]\n" + code + "\n\n" + t.Indent + "//[end]\n"
+	//}
 
 	result += "}"
 
