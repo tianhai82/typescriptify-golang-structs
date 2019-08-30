@@ -84,6 +84,7 @@ func main() {
 	handleErr(err)
 
 	filename = fmt.Sprintf("%s/typescriptify_%d.go", filename, time.Now().Nanosecond())
+	fmt.Println(filename)
 
 	f, err := os.Create(filename)
 	handleErr(err)

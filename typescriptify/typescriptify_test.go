@@ -13,6 +13,7 @@ type Address struct {
 	// Used in html
 	Duration float64 `json:"duration"`
 	Text1    string  `json:"text,omitempty"`
+	Text4    string  `json:"text4"`
 	// Ignored:
 	Text2 string `json:",omitempty"`
 	Text3 string `json:"-"`
@@ -29,18 +30,18 @@ type HasName struct {
 type Person struct {
 	HasName
 	Nicknames []string  `json:"nicknames"`
-	Addresses []Address `json:"addresses"`
+	Addresses []Address `json:"addresses,omitempty"`
 	Address   *Address  `json:"address"`
 	Metadata  []byte    `json:"metadata" ts_type:"{[key:string]:string}"`
 	Friends   []*Person `json:"friends"`
-	Dummy     Dummy     `json:"a"`
+	Dummy     Dummy     `json:"a,omitempty"`
 }
 
 func TestTypescriptifyWithTypes(t *testing.T) {
 	converter := New()
 
 	converter.AddType(reflect.TypeOf(Person{}))
-	converter.CreateFromMethod = false
+	//converter.CreateFromMethod = false
 	converter.BackupDir = ""
 
 	desiredResult := `export interface Dummy {
@@ -48,16 +49,17 @@ func TestTypescriptifyWithTypes(t *testing.T) {
 }
 export interface Address {
         duration: number;
-        text: string;
+        text?: string;
+        text4: string;
 }
 export interface Person {
         name: string;
         nicknames: string[];
-		addresses: Address[];
+		addresses?: Address[];
 		address: Address;
 		metadata: {[key:string]:string};
 		friends: Person[];
-        a: Dummy;
+        a?: Dummy;
 }`
 	testConverter(t, converter, desiredResult)
 }
@@ -67,7 +69,7 @@ func TestTypescriptifyWithInstances(t *testing.T) {
 
 	converter.Add(Person{})
 	converter.Add(Dummy{})
-	converter.CreateFromMethod = false
+	//converter.CreateFromMethod = false
 	converter.DontExport = true
 	converter.BackupDir = ""
 
@@ -76,16 +78,17 @@ func TestTypescriptifyWithInstances(t *testing.T) {
 }
 interface Address {
         duration: number;
-        text: string;
+        text?: string;
+        text4: string;
 }
 interface Person {
         name: string;
         nicknames: string[];
-		addresses: Address[];
+		addresses?: Address[];
 		address: Address;
 		metadata: {[key:string]:string};
 		friends: Person[];
-        a: Dummy;
+        a?: Dummy;
 }`
 	testConverter(t, converter, desiredResult)
 }
@@ -95,7 +98,7 @@ func TestTypescriptifyWithDoubleClasses(t *testing.T) {
 
 	converter.AddType(reflect.TypeOf(Person{}))
 	converter.AddType(reflect.TypeOf(Person{}))
-	converter.CreateFromMethod = false
+	//converter.CreateFromMethod = false
 	converter.BackupDir = ""
 
 	desiredResult := `export interface Dummy {
@@ -103,16 +106,17 @@ func TestTypescriptifyWithDoubleClasses(t *testing.T) {
 }
 export interface Address {
         duration: number;
-        text: string;
+        text?: string;
+        text4: string;
 }
 export interface Person {
         name: string;
 		nicknames: string[];
-		addresses: Address[];
+		addresses?: Address[];
 		address: Address;
 		metadata: {[key:string]:string};
 		friends: Person[];
-        a: Dummy;
+        a?: Dummy;
 }`
 	testConverter(t, converter, desiredResult)
 }
@@ -124,57 +128,27 @@ func TestWithPrefixes(t *testing.T) {
 	converter.Suffix = "_test"
 
 	converter.Add(Person{})
-	converter.CreateFromMethod = false
+	//converter.CreateFromMethod = false
 	converter.DontExport = true
 	converter.BackupDir = ""
-	converter.CreateFromMethod = true
+	//converter.CreateFromMethod = true
 
 	desiredResult := `interface test_Dummy_test {
     something: string;
-
-    static createFrom(source: any) {
-        if ('string' === typeof source) source = JSON.parse(source);
-        const result = new test_Dummy_test();
-        result.something = source["something"];
-        return result;
-    }
-
 }
 interface test_Address_test {
     duration: number;
-    text: string;
-
-    static createFrom(source: any) {
-        if ('string' === typeof source) source = JSON.parse(source);
-        const result = new test_Address_test();
-        result.duration = source["duration"];
-        result.text = source["text"];
-        return result;
-    }
-
+    text?: string;
+    text4: string;
 }
 interface test_Person_test {
     name: string;
     nicknames: string[];
-    addresses: test_Address_test[];
+    addresses?: test_Address_test[];
     address: test_Address_test;
     metadata: {[key:string]:string};
     friends: test_Person_test[];
-    a: test_Dummy_test;
-
-    static createFrom(source: any) {
-        if ('string' === typeof source) source = JSON.parse(source);
-        const result = new test_Person_test();
-        result.name = source["name"];
-        result.nicknames = source["nicknames"];
-        result.addresses = source["addresses"] ? source["addresses"].map(function(element: any) { return test_Address_test.createFrom(element); }) : null;
-        result.address = source["address"] ? test_Address_test.createFrom(source["address"]) : null;
-        result.metadata = source["metadata"];
-        result.friends = source["friends"] ? source["friends"].map(function(element: any) { return test_Person_test.createFrom(element); }) : null;
-        result.a = source["a"] ? test_Dummy_test.createFrom(source["a"]) : null;
-        return result;
-    }
-
+    a?: test_Dummy_test;
 }`
 	testConverter(t, converter, desiredResult)
 }
@@ -223,7 +197,7 @@ func TestTypescriptifyCustomType(t *testing.T) {
 	converter := New()
 
 	converter.AddType(reflect.TypeOf(TestCustomType{}))
-	converter.CreateFromMethod = false
+	//converter.CreateFromMethod = false
 	converter.BackupDir = ""
 
 	desiredResult := `export interface TestCustomType {
@@ -240,19 +214,11 @@ func TestDate(t *testing.T) {
 	converter := New()
 
 	converter.AddType(reflect.TypeOf(TestCustomType{}))
-	converter.CreateFromMethod = true
+	//converter.CreateFromMethod = true
 	converter.BackupDir = ""
 
 	desiredResult := `export interface TestCustomType {
     time: Date;
-
-    static createFrom(source: any) {
-        if ('string' === typeof source) source = JSON.parse(source);
-        const result = new TestCustomType();
-        result.time = new Date(source["time"]);
-        return result;
-    }
-
 }`
 	testConverter(t, converter, desiredResult)
 }
@@ -265,19 +231,11 @@ func TestRecursive(t *testing.T) {
 	converter := New()
 
 	converter.AddType(reflect.TypeOf(Test{}))
-	converter.CreateFromMethod = true
+	//converter.CreateFromMethod = true
 	converter.BackupDir = ""
 
 	desiredResult := `export interface Test {
     children: Test[];
-
-    static createFrom(source: any) {
-        if ('string' === typeof source) source = JSON.parse(source);
-        const result = new Test();
-        result.children = source["children"] ? source["children"].map(function(element: any) { return Test.createFrom(element); }) : null;
-        return result;
-    }
-
 }`
 	testConverter(t, converter, desiredResult)
 }
@@ -293,30 +251,14 @@ func TestArrayOfArrays(t *testing.T) {
 	converter := New()
 
 	converter.AddType(reflect.TypeOf(Keyboard{}))
-	converter.CreateFromMethod = true
+	//converter.CreateFromMethod = true
 	converter.BackupDir = ""
 
 	desiredResult := `export interface Key {
     key: string;
-
-    static createFrom(source: any) {
-        if ('string' === typeof source) source = JSON.parse(source);
-        const result = new Key();
-        result.key = source["key"];
-        return result;
-    }
-
 }
 export interface Keyboard {
     keys: Key[][];
-
-    static createFrom(source: any) {
-        if ('string' === typeof source) source = JSON.parse(source);
-        const result = new Keyboard();
-        result.keys = source["keys"] ? source["keys"].map(function(element: any) { return Key.createFrom(element); }) : null;
-        return result;
-    }
-
 }`
 	testConverter(t, converter, desiredResult)
 }
@@ -329,19 +271,11 @@ func TestAny(t *testing.T) {
 	converter := New()
 
 	converter.AddType(reflect.TypeOf(Test{}))
-	converter.CreateFromMethod = true
+	//converter.CreateFromMethod = true
 	converter.BackupDir = ""
 
 	desiredResult := `export interface Test {
     field: any;
-
-    static createFrom(source: any) {
-        if ('string' === typeof source) source = JSON.parse(source);
-        const result = new Test();
-        result.field = source["field"];
-        return result;
-    }
-
 }`
 	testConverter(t, converter, desiredResult)
 }
@@ -360,11 +294,27 @@ func TestTypeAlias(t *testing.T) {
 	converter := New()
 
 	converter.AddType(reflect.TypeOf(Person{}))
-	converter.CreateFromMethod = false
+	//converter.CreateFromMethod = false
 	converter.BackupDir = ""
 
 	desiredResult := `export interface Person {
     birth: number;
+}`
+	testConverter(t, converter, desiredResult)
+}
+func TestTypeAliasNullable(t *testing.T) {
+	type Person struct {
+		Birth NumberTime `json:"birth,omitempty" ts_type:"number"`
+	}
+
+	converter := New()
+
+	converter.AddType(reflect.TypeOf(Person{}))
+	//converter.CreateFromMethod = false
+	converter.BackupDir = ""
+
+	desiredResult := `export interface Person {
+    birth?: number;
 }`
 	testConverter(t, converter, desiredResult)
 }
@@ -387,7 +337,7 @@ func TestOverrideCustomType(t *testing.T) {
 	converter := New()
 
 	converter.AddType(reflect.TypeOf(SomeStruct{}))
-	converter.CreateFromMethod = false
+	//converter.CreateFromMethod = false
 	converter.BackupDir = ""
 
 	desiredResult := `export interface SomeStruct {
